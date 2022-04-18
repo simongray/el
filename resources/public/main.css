@@ -1,0 +1,33 @@
+html {
+    height: 100%; /* for vertical centering */
+}
+
+body {
+    height: 100%; /* for vertical centering */
+    box-sizing: border-box;
+    padding: 2ch;
+    display: grid;
+    place-items: center;
+}
+
+main {
+    max-width: 80ch;
+    font-family: Georgia, serif;
+}
+
+* {
+    letter-spacing: 0.05rem;
+}
+
+label {
+    font-weight: bold;
+}
+
+address {
+    font-size: 0.8rem;
+    font-style: italic;
+    line-height: 1.5;
+    text-align: right;
+    margin-top: 1rem;
+    color: #AAA;
+}
