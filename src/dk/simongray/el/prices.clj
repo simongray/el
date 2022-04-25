@@ -17,9 +17,9 @@
 (def request-opts
   {:throw-exceptions           false
    :retry-handler              nil
-   :socket-timeout             3000
-   :connection-timeout         5000
-   :connection-request-timeout 5000})
+   :socket-timeout             5000
+   :connection-timeout         10000
+   :connection-request-timeout 10000})
 
 (def fmt
   (tick/formatter :iso-local-date-time :dk))

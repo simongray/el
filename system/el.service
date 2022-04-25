@@ -1,0 +1,13 @@
+# /etc/systemd/system/el.service
+
+[Unit]
+Description=el.simongray.dk
+
+[Service]
+Type=simple
+RemainAfterExit=true
+WorkingDirectory=/opt/el
+ExecStart=/usr/local/bin/clojure -Xserver
+
+[Install]
+WantedBy=multi-user.target

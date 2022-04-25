@@ -1,0 +1,7 @@
+{$DOMAIN:localhost} {
+    redir el.{$DOMAIN:localhost}
+}
+
+el.{$DOMAIN:localhost} {
+    reverse_proxy :9876
+}

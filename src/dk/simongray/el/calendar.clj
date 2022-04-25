@@ -108,7 +108,7 @@
                      "Github"]
                     ")"]
                    [:form {:class  "pure-form pure-form-aligned"
-                           :action (str "webcal://" host "/spot-prices")}
+                           :action (str "webcal://" host "/subscribe")}
                     [:input {:type  "hidden"
                              :name  "language"
                              :value language}]
@@ -238,7 +238,7 @@
   (route/expand-routes
     #{["/" :get [language-negotiation-ic
                  root-handler] :route-name ::root]
-      ["/spot-prices"
+      ["/subscribe"
        :get [content-negotiation-ic
              calendar-handler]
        :route-name ::calendar]}))
@@ -254,12 +254,12 @@
              :base-uri    "'self'"}]
     (cond-> {::http/routes         #((deref #'routes))
              ::http/type           :jetty
-             ::http/host           "0.0.0.0"
+             ::http/host           "127.0.0.1"
              ::http/port           9876
              ::http/resource-path  "/public"
              ::http/secure-headers {:content-security-policy-settings csp}})))
 
-(defn start-server []
+(defn start-server [& args]
   (http/start (http/create-server service-map)))
 
 (defn start-dev-server []
