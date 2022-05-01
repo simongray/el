@@ -1,7 +1,7 @@
-https://{$DOMAIN:localhost} {
+{$DOMAIN:localhost} {
     redir https://el.{$DOMAIN:localhost}
 }
 
-https://el.{$DOMAIN:localhost} {
+el.{$DOMAIN:localhost} {
     reverse_proxy :9876
 }

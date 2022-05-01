@@ -4,6 +4,7 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.http.content-negotiation :as conneg]
             [ring.util.codec :as codec]                     ; NOTE: transitive
+            [clj-http.client :as client]
             [tick.core :as tick]
             [clj-icalendar.core :as ical]
             [rum.core :as rum]
@@ -97,7 +98,7 @@
                   [:title (tr :tr/title)]
                   [:meta {:name    "viewport"
                           :content "width=device-width, initial-scale=1.0"}]
-                  [:link {:rel "icon" :href "favicon.svg"}]
+                  [:link {:rel "icon" :href "/favicon.svg"}]
                   [:link {:rel "stylesheet" :href "/pure-min.css"}]
                   [:link {:rel "stylesheet" :href "/main.css"}]
                   [:meta {:charset "UTF-8"}]]
@@ -300,4 +301,11 @@
 
 (comment
   (restart-dev-server)
+
+  ;; Test the local endpoint.
+  (client/get "http://localhost:9876//calendar" {:query-params
+                                                 {:language  "da"
+                                                  :currency  "DKK"
+                                                  :max-price "1.00"
+                                                  :region    "DK2"}})
   #_.)

@@ -5,7 +5,7 @@
             [clj-http.client :as client]
             [again.core :as again]
             [io.pedestal.log :as log]
-            [tick.core :as tick]))
+            [tick.core :as t]))
 
 (defonce exchange-rates
   (atom nil))
@@ -22,7 +22,7 @@
    :connection-request-timeout 10000})
 
 (def fmt
-  (tick/formatter :iso-local-date-time :dk))
+  (t/formatter :iso-local-date-time :dk))
 
 (def exchange-rates-url
   "https://www.nationalbanken.dk/_vti_bin/DN/DataService.svc/CurrencyRatesXML?lang=en")
@@ -44,7 +44,7 @@
 (defn- hours-old
   [state-val n]
   (if-let [ts (-> state-val meta :timestamp)]
-    (tick/> (tick/now) (tick/>> ts (tick/of-hours n)))
+    (t/> (t/now) (t/>> ts (t/of-hours n)))
     true))
 
 (defn- bad-api-result?
@@ -81,7 +81,7 @@
 (defn timestamped
   "Return a function which timestamps the result of `f` & `args`."
   [f & args]
-  (constantly (with-meta (apply f args) {:timestamp (tick/now)})))
+  (constantly (with-meta (apply f args) {:timestamp (t/now)})))
 
 (defn exchange-rate
   "Return the exchange rate to DKK for the `currency` (identified by its code)."
@@ -109,8 +109,8 @@
 
 (defn- >=today?
   [price-data-result]
-  (tick/>= (tick/parse-date (-> price-data-result first :HourDK) fmt)
-           (tick/date)))
+  (t/>= (t/parse-date (-> price-data-result first :HourDK) fmt)
+        (t/date (t/in (t/now) "CET"))))
 
 (defn fetch-current-prices
   "Fetch current price data as a single collection according to `params`."
@@ -138,7 +138,7 @@
   "Get a timestamp + the spot price in `currency` for `raw-price-data`."
   [currency {:keys [HourDK PriceArea] :as raw-price-data}]
   (let [price-mwh (local-price currency raw-price-data)]
-    {:timestamp (tick/parse-date-time HourDK fmt)
+    {:timestamp (t/in (t/parse-date-time HourDK fmt) "CET")
      :currency  currency
      :region    PriceArea
      :price-mwh price-mwh
@@ -160,7 +160,7 @@
         price-before (peek price-group)
         prev-ts      (:timestamp price-before)]
     (if (and prev-ts
-             (tick/= prev-ts (tick/>> timestamp (tick/new-duration 1 :hours))))
+             (t/= prev-ts (t/>> timestamp (t/new-duration 1 :hours))))
       (conj (vec (butlast ret)) (conj price-group price))
       (conj ret (list price)))))
 
@@ -171,7 +171,7 @@
 
 (defn- daily-sorted-prices
   [prices]
-  (-> (group-by (comp tick/day-of-month :timestamp) prices)
+  (-> (group-by (comp t/day-of-month :timestamp) prices)
       (update-vals (fn [prices] (sort-by :price-kwh prices)))))
 
 (defn daily-minima
