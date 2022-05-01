@@ -12,7 +12,38 @@ body {
 
 main {
     max-width: 80ch;
+    padding: 1.5rem;
     font-family: Georgia, serif;
+    background-color: white;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    box-shadow: 0 0 1rem #ddd;
+}
+
+h1 {
+    text-align: center;
+    padding: 0.5rem;
+    margin-top: 0;
+}
+
+h1 img {
+    vertical-align: text-top;
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+}
+
+p {
+    margin: 1.5rem 0;
+}
+
+form {
+    background-color: #efefef;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0.5rem #ddd;
+    padding: 1rem;
+    margin: 0;
 }
 
 * {
@@ -28,6 +59,6 @@ address {
     font-style: italic;
     line-height: 1.5;
     text-align: right;
-    margin-top: 1rem;
+    margin: 1rem 0;
     color: #AAA;
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Uploaded to SVGRepo https://www.svgrepo.com -->
+<svg version="1.1" id="Electricity" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	 y="0px" width="256px" height="256px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve">
+<path d="M183,102V88h10V58h-23V16.5c0-6.351-5.149-11.5-11.5-11.5h0c-6.351,0-11.5,5.149-11.5,11.5V58h-39V16.5
+	C108,10.149,102.851,5,96.5,5h0C90.149,5,85,10.149,85,16.5V58H62v30h10v14c0,26.958,20.828,49.9,47,53v49c0,25.957,21.043,47,47,47
+	h27v-17h-27c-16.5,0-30-13.5-30-30v-49C162.256,152.008,183,129.039,183,102z"/>
+</svg>

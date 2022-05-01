@@ -31,7 +31,8 @@
                             "according to when the spot price is low.")
         :tr/p3            (str
                             "Here you can subscribe to an automatically updating calendar showing when "
-                            "electricity in Denmark will be cheap during the coming 24 to 48 hours.")}
+                            "electricity in Denmark will be cheap during the coming 24 to 48 hours.")
+        :tr/note          "(set the update schedule to 1 hour or similar)"}
    :da {:tr/title         "Dansk el-kalender"
         :tr/subscribe     "Abonnér"
         :tr/max-price     "Prisloft"
@@ -50,7 +51,8 @@
                             "efter hvornår spotprisen er lav.")
         :tr/p3            (str
                             "Her kan du abonnere på en automatisk opdaterende kalender, der viser hvornår "
-                            "elektriciteten i Danmark vil være billig i de kommende 24 til 48 timer.")}})
+                            "elektriciteten i Danmark vil være billig i de kommende 24 til 48 timer.")
+        :tr/note          "(sæt opdateringsraten til 1 time eller lignende)"}})
 
 (def translate
   (tongue/build-translate dicts))
@@ -92,14 +94,18 @@
      :body    (rum/render-static-markup
                 [:html
                  [:head
+                  [:title (tr :tr/title)]
                   [:meta {:name    "viewport"
                           :content "width=device-width, initial-scale=1.0"}]
+                  [:link {:rel "icon" :href "favicon.svg"}]
                   [:link {:rel "stylesheet" :href "/pure-min.css"}]
                   [:link {:rel "stylesheet" :href "/main.css"}]
                   [:meta {:charset "UTF-8"}]]
                  [:body {:lang language}
                   [:main
-                   [:h1 (tr :tr/title)]
+                   [:h1
+                    [:img {:src "favicon.svg" :alt ""}]
+                    (tr :tr/title)]
                    [:p (tr :tr/p1)]
                    [:p (tr :tr/p2)]
                    [:p (tr :tr/p3)]
@@ -117,7 +123,6 @@
                              :name  "currency"
                              :value "DKK"}]
                     [:fieldset
-                     [:legend]
                      [:div.pure-control-group
                       [:label {:for "max-price"}
                        (tr :tr/max-price)]
@@ -139,7 +144,8 @@
                      [:div.pure-controls
                       [:input {:value (tr :tr/subscribe)
                                :class "pure-button pure-button-primary"
-                               :type  "submit"}]]]]]]])}))
+                               :type  "submit"}]
+                      [:span.pure-form-message-inline (tr :tr/note)]]]]]]])}))
 
 (defn price-summary
   [price-groups]
