@@ -1,5 +1,5 @@
 {$DOMAIN:localhost} {
-    redir el.{$DOMAIN:localhost}
+    redir https://el.{$DOMAIN:localhost}
 }
 
 el.{$DOMAIN:localhost} {

@@ -14,31 +14,32 @@ Assuming that the calendar web service is already running in a Clojure REPL:
 caddy run
 ```
 
-### Production (Linux)
-From inside the `el` directory:
+Apple's Calendar app won't like the fact that localhost has a subdomain (`el.localhost`), so the actual calendar subscription will fail for that reason. However, subscribing via `localhost:9876` can be used to verify that the service works as intended.
+
+### Production
+Copy required files:
 
 ```shell
-# copy required files
-cp system/el.service /etc/systemd/system/el.service 
-cp system/caddy.service /etc/systemd/system/caddy.service 
-cp Caddyfile /etc/caddy/Caddyfile
+# from inside the `el` directory
+sh install.sh
+```
 
-# ... or just run ./install.sh
-./install.sh
+Systemd setup:
 
+```shell
 # enable systemd units (just once)
 systemctl enable el
 systemctl enable caddy
 ```
 
-Running the system:
+Starting the system:
 
 ```shell
 # start services (as needed)
 systemctl start el
 systemctl start caddy
 
-# manual caddy run (debugging only)
+# ..or do a manual caddy run (debugging only)
 DOMAIN=simongray.dk caddy run
 ```
 

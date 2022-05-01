@@ -3,6 +3,7 @@
             [io.pedestal.http :as http]
             [io.pedestal.http.route :as route]
             [io.pedestal.http.content-negotiation :as conneg]
+            [ring.util.codec :as codec]                     ; NOTE: transitive
             [tick.core :as tick]
             [clj-icalendar.core :as ical]
             [rum.core :as rum]
@@ -81,9 +82,9 @@
   (->language-negotiation-ic ["en" "da"]))
 
 (defn root-handler
+  "Handler serving a basic HTML landing page."
   [request]
-  (let [host     (get-in request [:headers "host"])
-        language (get-in request [:accept-language :field])
+  (let [language (get-in request [:accept-language :field])
         tr       (partial translate (keyword language))]
     {:status  200
      :headers {"Content-Type"     "text/html"
@@ -108,7 +109,7 @@
                      "Github"]
                     ")"]
                    [:form {:class  "pure-form pure-form-aligned"
-                           :action (str "webcal://" host "/subscribe")}
+                           :action "/subscribe"}
                     [:input {:type  "hidden"
                              :name  "language"
                              :value language}]
@@ -211,6 +212,7 @@
   (into {} content-type-body-kvs))
 
 (defn calendar-handler
+  "Handler serving the iCalendar data."
   [{:keys [query-params] :as request}]
   (let [{:keys [region language currency max-price]
          :or   {region    "DK2"
@@ -230,17 +232,31 @@
                                        :minima (el/daily-minima prices)
                                        :maxima (el/daily-maxima prices)})}))
 
+(defn subscribe-handler
+  "Handler which redirects an HTTPS subcribe request to the webcal protocol.
+
+  The main purpose is to circumvent Chrome's 'not fully secure' message which
+  occurs if a form submits to a non-HTTPS URL, e.g. webcal://."
+  [{:keys [query-params headers] :as request}]
+  (let [webcal (str "webcal://" (get headers "host") "/calendar")
+        params (codec/form-encode query-params)]
+    {:status  303
+     :headers {"Location" (str webcal "?" params)}}))
+
 (def content-negotiation-ic
   (conneg/negotiate-content (map first content-type-body-kvs)))
 
 (defn routes
   []
   (route/expand-routes
-    #{["/" :get [language-negotiation-ic
-                 root-handler] :route-name ::root]
+    #{["/"
+       :get [language-negotiation-ic root-handler]
+       :route-name ::root]
       ["/subscribe"
-       :get [content-negotiation-ic
-             calendar-handler]
+       :get [subscribe-handler]
+       :route-name ::subscribe]
+      ["/calendar"
+       :get [content-negotiation-ic calendar-handler]
        :route-name ::calendar]}))
 
 ;; TODO: take a look at this
