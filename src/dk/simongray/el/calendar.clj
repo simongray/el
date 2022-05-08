@@ -87,7 +87,7 @@
 (defn root-handler
   "Handler serving a basic HTML landing page."
   [request]
-  (let [language (get-in request [:accept-language :field])
+  (let [language (get-in request [:accept-language :field] "en")
         tr       (partial translate (keyword language))]
     {:status  200
      :headers {"Content-Type"     "text/html"
