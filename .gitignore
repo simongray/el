@@ -2,3 +2,5 @@
 .nrepl-port
 *.iml
 .cpcache
+target/
+*.jar

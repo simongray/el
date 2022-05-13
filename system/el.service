@@ -7,7 +7,7 @@ Description=el.simongray.dk
 Type=simple
 RemainAfterExit=true
 WorkingDirectory=/opt/el
-ExecStart=/usr/local/bin/clojure -Xserver
+ExecStart=/usr/bin/java -jar el.jar
 
 [Install]
 WantedBy=multi-user.target

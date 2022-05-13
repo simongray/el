@@ -17,7 +17,11 @@ caddy run
 Apple's Calendar app won't like the fact that localhost has a subdomain (`el.localhost`), so the actual calendar subscription will fail for that reason. However, subscribing via `localhost:9876` can be used to verify that the service works as intended.
 
 ### Production
-Copy required files:
+Either upload via SFTP or build an uberjar called `el.jar`. The uberjar is created by running the `ci` function in  `dev/src/build.clj`. This .jar file needs to be located in `/opt/el` on the server.
+
+To save on server resources, it's probably best to build `el.jar` on the dev machine and upload it to the server. Running an uberjar (as opposed to running via `/usr/local/bin/clojure -Xserver`, which I did originally) is [much more performant](https://github.com/simongray/el/issues/6).
+
+Copy Systemd units and Caddyfile:
 
 ```shell
 # from inside the `el` directory

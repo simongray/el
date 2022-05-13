@@ -9,7 +9,8 @@
             [clj-icalendar.core :as ical]
             [rum.core :as rum]
             [tongue.core :as tongue]
-            [dk.simongray.el.prices :as el]))
+            [dk.simongray.el.prices :as el])
+  (:gen-class))
 
 (defonce server (atom nil))
 
@@ -298,6 +299,10 @@
   (when @server
     (stop-dev-server))
   (start-dev-server))
+
+(defn -main
+  [& args]
+  (start-server))
 
 (comment
   (restart-dev-server)

@@ -13,4 +13,8 @@
            rum/rum                      {:mvn/version "0.12.9"}
            tongue/tongue                {:mvn/version "0.4.4"}}
  :aliases {:server {:main-opts ["-m" "dk.simongray.el.calendar"]
-                    :exec-fn   dk.simongray.el.calendar/start-server}}}
+                    :exec-fn   dk.simongray.el.calendar/start-server}
+           :build  {:extra-paths ["dev/src"]
+                    :extra-deps  {io.github.seancorfield/build-clj
+                                  {:git/tag "v0.8.0" :git/sha "9bd8b8a"}}
+                    :ns-default  build}}}
