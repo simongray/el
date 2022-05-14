@@ -5,7 +5,7 @@
             [io.pedestal.http.content-negotiation :as conneg]
             [ring.util.codec :as codec]                     ; NOTE: transitive
             [clj-http.client :as client]
-            [tick.core :as tick]
+            [tick.core :as t]
             [clj-icalendar.core :as ical]
             [rum.core :as rum]
             [tongue.core :as tongue]
@@ -14,50 +14,71 @@
 
 (defonce server (atom nil))
 
-(def dicts
-  {:en {:tr/title         "Danish electricity calendar"
-        :tr/subscribe     "Subscribe"
-        :tr/max-price     "Price ceiling"
-        :tr/max-price-msg "DKK / kWh"
-        :tr/region        "Area"
-        :tr/dk            "Unsure"
-        :tr/dk1           "West Denmark"
-        :tr/dk2           "East Denmark"
-        :tr/p1            (str
-                            "Many danish households pay a fluctuating price for electricity. "
-                            "In fact, the spot price—i.e. the market price—of electricity changes every hour. "
-                            "Usually the price will be around 0 to 3 DKK per kWh before taxes.")
-        :tr/p2            (str
-                            "If you have a fluctuating electricity price, you might as well plan usage spikes"
-                            "—e.g. use of a dishwasher, tumble dryer, or washing machine—"
-                            "according to when the spot price is low.")
-        :tr/p3            (str
-                            "Here you can subscribe to an automatically updating calendar showing when "
-                            "electricity in Denmark will be cheap during the coming 24 to 48 hours.")
-        :tr/note          "(set the update schedule to 1 hour or similar)"}
-   :da {:tr/title         "Dansk el-kalender"
-        :tr/subscribe     "Abonnér"
-        :tr/max-price     "Prisloft"
-        :tr/max-price-msg "kr. / kWh"
-        :tr/region        "Område"
-        :tr/dk            "Ved ikke"
-        :tr/dk1           "Vestdanmark"
-        :tr/dk2           "Østdanmark"
-        :tr/p1            (str
-                            "Mange danske husstande har en variabel elpris. "
-                            "Faktisk ændrer spotprisen—dvs. markedsprisen—på el sig hver eneste time. "
-                            "Som regel ligger prisen et sted mellem 0 og 3 kr. per kWh før skat. ")
-        :tr/p2            (str
-                            "Hvis du har en variabel elpris, kan du med fordel planlægge større strømforbrug"
-                            "—f.eks. brug af vaskemaskine, tørretumbler eller opvaskemaskine—"
-                            "efter hvornår spotprisen er lav.")
-        :tr/p3            (str
-                            "Her kan du abonnere på en automatisk opdaterende kalender, der viser hvornår "
-                            "elektriciteten i Danmark vil være billig i de kommende 24 til 48 timer.")
-        :tr/note          "(sæt opdateringsraten til 1 time eller lignende)"}})
+(defn- round
+  [n]
+  (let [factor (Math/pow 10 2)]
+    (/ (Math/round (float (* n factor))) factor)))
 
 (def translate
-  (tongue/build-translate dicts))
+  (tongue/build-translate
+    {:en {:tongue/format-number (comp (tongue/number-formatter {:group   ","
+                                                                :decimal "."})
+                                      round)
+          :tr/evt-low-title     "Average: ~{1} {2}/kWh"
+          :tr/evt-min-title     "Lowest: {1} {2}/kWh"
+          :tr/evt-max-title     "Highest: {1} {2}/kWh"
+          :tr/evt-low-desc      "The local minimum spot price occurs at {1} (price: {2} {3}/kWh)."
+          :tr/evt-min-desc      "The daily minimum spot price is {1} {2}/kWh."
+          :tr/evt-max-desc      "The daily maximum spot price is {1} {2}/kWh."
+          :tr/title             "Danish electricity calendar"
+          :tr/subscribe         "Subscribe"
+          :tr/max-price         "Price ceiling"
+          :tr/max-price-msg     "DKK / kWh"
+          :tr/region            "Area"
+          :tr/dk                "Unsure"
+          :tr/dk1               "West Denmark"
+          :tr/dk2               "East Denmark"
+          :tr/p1                (str
+                                  "Many danish households pay a fluctuating price for electricity. "
+                                  "In fact, the spot price—i.e. the market price—of electricity changes every hour. "
+                                  "Usually the price will be around 0 to 3 DKK per kWh before taxes.")
+          :tr/p2                (str
+                                  "If you have a fluctuating electricity price, you might as well plan usage spikes"
+                                  "—e.g. use of a dishwasher, tumble dryer, or washing machine—"
+                                  "according to when the spot price is low.")
+          :tr/p3                (str
+                                  "Here you can subscribe to an automatically updating calendar showing when "
+                                  "electricity in Denmark will be cheap during the coming 24 to 48 hours.")
+          :tr/note              "(set the update schedule to 1 hour or similar)"}
+     :da {:tongue/format-number (comp (tongue/number-formatter {:group   "."
+                                                                :decimal ","})
+                                      round)
+          :tr/evt-low-title     "Gennemsnit: ~{1} {2}/kWh"
+          :tr/evt-min-title     "Lavest: {1} {2}/kWh"
+          :tr/evt-max-title     "Højest: {1} {2}/kWh"
+          :tr/evt-low-desc      "Det lokale lavpunkt for spotprisen finder sted kl. {1} (pris: {2} {3}/kWh)."
+          :tr/evt-min-desc      "Dagens minimumsspotpris er {1} {2}/kWh."
+          :tr/evt-max-desc      "Dagens maksimumsspotpris er {1} {2}/kWh."
+          :tr/title             "Dansk el-kalender"
+          :tr/subscribe         "Abonnér"
+          :tr/max-price         "Prisloft"
+          :tr/max-price-msg     "kr. / kWh"
+          :tr/region            "Område"
+          :tr/dk                "Ved ikke"
+          :tr/dk1               "Vestdanmark"
+          :tr/dk2               "Østdanmark"
+          :tr/p1                (str
+                                  "Mange danske husstande har en variabel elpris. "
+                                  "Faktisk ændrer spotprisen—dvs. markedsprisen—på el sig hver eneste time. "
+                                  "Som regel ligger prisen et sted mellem 0 og 3 kr. per kWh før skat. ")
+          :tr/p2                (str
+                                  "Hvis du har en variabel elpris, kan du med fordel planlægge større strømforbrug"
+                                  "—f.eks. brug af vaskemaskine, tørretumbler eller opvaskemaskine—"
+                                  "efter hvornår spotprisen er lav.")
+          :tr/p3                (str
+                                  "Her kan du abonnere på en automatisk opdaterende kalender, der viser hvornår "
+                                  "elektriciteten i Danmark vil være billig i de kommende 24 til 48 timer.")
+          :tr/note              "(sæt opdateringsraten til 1 time eller lignende)"}}))
 
 (defn ->language-negotiation-ic
   "Make a language negotiation interceptor from a coll of `supported-languages`.
@@ -160,56 +181,73 @@
 (def time-fmt
   "HH:mm")
 
-(defn- add-min-max
-  [cal timestamp title description region]
-  (ical/add-event! cal (ical/create-event
-                         (tick/inst timestamp)
-                         (tick/inst (tick/>> timestamp
-                                             (tick/of-hours 1)))
-                         title
-                         :unique-id (str (random-uuid))
-                         :description description
-                         :location region
-                         :organizer "spot-prices")))
+(def uid-datetime-fmt
+  "yyyy-MM-dd-HH")
 
-(defn- price-str
-  [price-kwh currency]
-  (str (format "%.2f" price-kwh) " "
-       currency "/kWh"))
+(defn- uid
+  "Generate a unique ID for an event of `event-type` with `start` and `end`."
+  [event-type start end]
+  (str (name event-type) "--"
+       (t/format uid-datetime-fmt start) "--"
+       (t/format uid-datetime-fmt end)))
+
+(defn- add-extrema!
+  [{:keys [cal timestamp title description region]}]
+  (let [end (t/>> timestamp (t/of-hours 1))]
+    (ical/add-event! cal (ical/create-event
+                           (t/inst timestamp)
+                           (t/inst end)
+                           title
+                           :unique-id (uid :extrema timestamp end)
+                           :description description
+                           :location region
+                           :organizer "spot-prices"))))
 
 (defn ics-body
   "Icalendar-formatted body for :groups, :minima, and :maxima in `opts`."
-  [{:keys [groups minima maxima] :as opts}]
-  (let [cal      (ical/create-cal "el-priser" "el-priser" "V0.1" "EN")
-        currency (:currency (first minima))
-        extrema  (set (map vector (concat minima maxima)))]
+  [{:keys [region language currency max-price
+           groups minima maxima] :as opts}]
+  (let [cal     (ical/create-cal "el-priser" "el-priser" "V0.1" "EN")
+        extrema (set (map vector (concat minima maxima)))
+        tr      (partial translate (keyword language))]
+
+    ;; Add low-price events.
     (doseq [{:keys [from to mean minimum]} (->> (remove extrema groups)
                                                 (map price-summary))
             :let [{:keys [timestamp price-kwh]} minimum
-                  title       (str "Average: ~" (price-str mean currency))
-                  description (str "The local minimum spot price occurs at "
-                                   (tick/format time-fmt timestamp) " (price: "
-                                   (price-str price-kwh currency) ").")]]
+                  title       (tr :tr/evt-low-title mean currency)
+                  hh-mm       (t/format time-fmt timestamp)
+                  description (tr :tr/evt-low-desc hh-mm price-kwh currency)
+                  start       (:timestamp from)
+                  end         (t/>> (:timestamp to) (t/of-hours 1))]]
       (ical/add-event! cal (ical/create-event
-                             (tick/inst (:timestamp from))
-                             (tick/inst (tick/>> (:timestamp to)
-                                                 (tick/of-hours 1)))
+                             (t/inst start)
+                             (t/inst end)
                              title
-                             :unique-id (str (random-uuid))
+                             :unique-id (uid :low start end)
                              :description description
                              :location (:region from)
                              :organizer "spot-prices")))
+
+    ;; Add daily minimum price events.
     (doseq [{:keys [timestamp price-kwh region]} minima
-            :let [title       (str "Lowest: " (price-str price-kwh currency))
-                  description (str "The daily minimum spot price is "
-                                   (price-str price-kwh currency) ".")]]
-      (add-min-max cal timestamp title description region))
+            :let [title       (tr :tr/evt-min-title price-kwh currency)
+                  description (tr :tr/evt-min-desc price-kwh currency)]]
+      (add-extrema! {:cal         cal
+                     :timestamp   timestamp
+                     :title       title
+                     :description description
+                     :region      region}))
+
+    ;; Add daily maximum price events.
     (doseq [{:keys [timestamp price-kwh region]} maxima
-            :let [title       (str "Highest: " (price-str price-kwh currency))
-                  description (str "The daily maximum spot price is "
-                                   (str (format "%.2f" price-kwh) " "
-                                        currency "/KWh" "."))]]
-      (add-min-max cal timestamp title description region))
+            :let [title       (tr :tr/evt-max-title price-kwh currency)
+                  description (tr :tr/evt-max-desc price-kwh currency)]]
+      (add-extrema! {:cal         cal
+                     :timestamp   timestamp
+                     :title       title
+                     :description description
+                     :region      region}))
     (ical/output-calendar cal)))
 
 (def content-type-body-kvs
@@ -231,14 +269,19 @@
         params       (assoc el/default-params
                        :filters (json/write-str {"PriceArea" region}))
         n            (parse-double max-price)
-        prices       (el/normalize currency (el/current-prices params))]
+        prices       (el/normalize currency (el/current-prices params))
+        ->body       (body-fn content-type)]
     {:status  200
      :headers {"Content-Type"     content-type
                "Content-Language" language}
-     :body    ((body-fn content-type) {:groups (-> (el/prices-below n prices)
-                                                   (el/group-adjacent))
-                                       :minima (el/daily-minima prices)
-                                       :maxima (el/daily-maxima prices)})}))
+     :body    (->body {:region    region
+                       :language  language
+                       :currency  currency
+                       :max-price max-price
+                       :groups    (-> (el/prices-below n prices)
+                                      (el/group-adjacent))
+                       :minima    (el/daily-minima prices)
+                       :maxima    (el/daily-maxima prices)})}))
 
 (defn subscribe-handler
   "Handler which redirects an HTTPS subcribe request to the webcal protocol.
@@ -306,6 +349,7 @@
 
 (comment
   (restart-dev-server)
+  (stop-dev-server)
 
   ;; Test the local endpoint.
   (client/get "http://localhost:9876//calendar" {:query-params

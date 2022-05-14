@@ -150,7 +150,7 @@
   (map (partial price-info currency) raw-prices))
 
 (defn prices-below
-  "Filter normalized `prices` with a currency/KWh below `n`."
+  "Filter normalized `prices` with a currency/kWh below `n`."
   [n prices]
   (filter #(< (:price-kwh %) n) prices))
 
