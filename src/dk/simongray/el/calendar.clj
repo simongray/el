@@ -38,15 +38,15 @@
           :tr/dk                "Unsure"
           :tr/dk1               "West Denmark"
           :tr/dk2               "East Denmark"
-          :tr/p1                (str
+          :tr/p2                (str
                                   "Many danish households pay a fluctuating price for electricity. "
                                   "In fact, the spot price—i.e. the market price—of electricity changes every hour. "
                                   "Usually the price will be around 0 to 3 DKK per kWh before taxes.")
-          :tr/p2                (str
+          :tr/p3                (str
                                   "If you have a fluctuating electricity price, you might as well plan usage spikes"
                                   "—e.g. use of a dishwasher, tumble dryer, or washing machine—"
                                   "according to when the spot price is low.")
-          :tr/p3                (str
+          :tr/p1                (str
                                   "Here you can subscribe to an automatically updating calendar showing when "
                                   "electricity in Denmark will be cheap during the coming 24 to 48 hours.")
           :tr/note              "(set the update schedule to 1 hour or similar)"}
@@ -67,15 +67,15 @@
           :tr/dk                "Ved ikke"
           :tr/dk1               "Vestdanmark"
           :tr/dk2               "Østdanmark"
-          :tr/p1                (str
+          :tr/p2                (str
                                   "Mange danske husstande har en variabel elpris. "
                                   "Faktisk ændrer spotprisen—dvs. markedsprisen—på el sig hver eneste time. "
                                   "Som regel ligger prisen et sted mellem 0 og 3 kr. per kWh før skat. ")
-          :tr/p2                (str
+          :tr/p3                (str
                                   "Hvis du har en variabel elpris, kan du med fordel planlægge større strømforbrug"
                                   "—f.eks. brug af vaskemaskine, tørretumbler eller opvaskemaskine—"
                                   "efter hvornår spotprisen er lav.")
-          :tr/p3                (str
+          :tr/p1                (str
                                   "Her kan du abonnere på en automatisk opdaterende kalender, der viser hvornår "
                                   "elektriciteten i Danmark vil være billig i de kommende 24 til 48 timer.")
           :tr/note              "(sæt opdateringsraten til 1 time eller lignende)"}}))
