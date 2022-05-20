@@ -6,6 +6,13 @@ The `dk.simongray.el.prices` namespace is a micro-library for sourcing the lates
 ## Setup
 Caddy must be installed, along with Clojure and a JVM of course.
 
+The production system is compiled from source using [xcaddy](https://github.com/caddyserver/xcaddy) in order to allow rate-limiting, since Caddy doesn't provide this feature built in. My chosen rate limiting extension is the [one by RussellLuo](https://github.com/RussellLuo/caddy-ext/tree/master/ratelimit) as it was the simplest to implement. Compiling a custom Caddy binary requires both Go and xcaddy to be installed:
+
+```shell
+xcaddy build --with github.com/RussellLuo/caddy-ext/ratelimit
+cp ./caddy /usr/bin/caddy
+```
+
 ### Development
 Assuming that the calendar web service is already running in a Clojure REPL:
 

@@ -1,7 +1,12 @@
+{
+    order rate_limit before basicauth
+}
+
 {$DOMAIN:localhost} {
     redir https://el.{$DOMAIN:localhost}
 }
 
 el.{$DOMAIN:localhost} {
+    rate_limit {remote.ip} 100r/m
     reverse_proxy :9876
 }
