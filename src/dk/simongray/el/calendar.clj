@@ -41,7 +41,7 @@
           :tr/dk2               "East Denmark"
           :tr/p1                (str
                                   "Here you can subscribe to an automatically updating calendar showing when "
-                                  "electricity in Denmark will be cheap during the coming 24 to 48 hours.")
+                                  "electricity in Denmark will be cheap during the coming 12 to 36 hours.")
           :tr/p2                (str
                                   "Many danish households pay a fluctuating price for electricity. "
                                   "In fact, the spot price—i.e. the market price—of electricity changes every hour. "
@@ -71,7 +71,7 @@
           :tr/dk2               "Østdanmark"
           :tr/p1                (str
                                   "Her kan du abonnere på en automatisk opdaterende kalender, der viser hvornår "
-                                  "elektriciteten i Danmark vil være billig i de kommende 24 til 48 timer.")
+                                  "elektriciteten i Danmark vil være billig i de kommende 12 til 36 timer.")
           :tr/p2                (str
                                   "Mange danske husstande har en variabel elpris. "
                                   "Faktisk ændrer spotprisen—dvs. markedsprisen—på el sig hver eneste time. "
