@@ -32,6 +32,7 @@
           :tr/evt-max-desc      "The daily maximum spot price is {1} {2}/kWh."
           :tr/title             "Danish electricity calendar"
           :tr/subscribe         "Subscribe"
+          :tr/google-note       "I use Google Calendar"
           :tr/max-price         "Price ceiling"
           :tr/max-price-msg     "DKK / kWh"
           :tr/region            "Area"
@@ -61,6 +62,7 @@
           :tr/evt-max-desc      "Dagens maksimumsspotpris er {1} {2}/kWh."
           :tr/title             "Dansk el-kalender"
           :tr/subscribe         "Abonnér"
+          :tr/google-note       "Jeg bruger Google Kalender"
           :tr/max-price         "Prisloft"
           :tr/max-price-msg     "kr. / kWh"
           :tr/region            "Område"
@@ -164,6 +166,11 @@
                        [:option {:value "DK"} (tr :tr/dk)]
                        [:option {:value "DK1"} (tr :tr/dk1)]
                        [:option {:value "DK2"} (tr :tr/dk2)]]]
+                     [:div.pure-controls
+                      [:input {:id   "google"
+                               :name "google"
+                               :type "checkbox"}]
+                      " " [:label {:for "google"} (tr :tr/google-note)]]
                      [:div.pure-controls
                       [:input {:value (tr :tr/subscribe)
                                :class "pure-button pure-button-primary"
@@ -285,14 +292,20 @@
 
 (defn subscribe-handler
   "Handler which redirects an HTTPS subcribe request to the webcal protocol.
+  Optionally redirects towards Google Calendar with the webcal link as a param.
 
   The main purpose is to circumvent Chrome's 'not fully secure' message which
   occurs if a form submits to a non-HTTPS URL, e.g. webcal://."
   [{:keys [query-params headers] :as request}]
-  (let [webcal (str "webcal://" (get headers "host") "/calendar")
-        params (codec/form-encode query-params)]
+  (let [google?      (:google query-params)
+        gcal         "https://calendar.google.com/calendar/u/0/r?cid="
+        webcal       (str "webcal://" (get headers "host") "/calendar")
+        params       (codec/form-encode (dissoc query-params :google))
+        calendar-url (str webcal "?" params)]
     {:status  303
-     :headers {"Location" (str webcal "?" params)}}))
+     :headers {"Location" (if google?
+                            (str gcal (codec/form-encode calendar-url))
+                            calendar-url)}}))
 
 (def content-negotiation-ic
   (conneg/negotiate-content (map first content-type-body-kvs)))

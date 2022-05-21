@@ -50,7 +50,7 @@ form {
     letter-spacing: 0.05rem;
 }
 
-label {
+label:first-child {
     font-weight: bold;
 }
 
