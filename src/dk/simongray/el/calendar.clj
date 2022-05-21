@@ -334,7 +334,7 @@
              :base-uri    "'self'"}]
     (cond-> {::http/routes         #((deref #'routes))
              ::http/type           :jetty
-             ::http/host           "127.0.0.1"
+             ::http/host           "0.0.0.0"
              ::http/port           9876
              ::http/resource-path  "/public"
              ::http/secure-headers {:content-security-policy-settings csp}})))
