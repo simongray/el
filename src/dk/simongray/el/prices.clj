@@ -17,7 +17,7 @@
 (def request-opts
   {:throw-exceptions           false
    :retry-handler              nil
-   :socket-timeout             5000
+   :socket-timeout             10000
    :connection-timeout         10000
    :connection-request-timeout 10000})
 
@@ -27,19 +27,12 @@
 (def exchange-rates-url
   "https://www.nationalbanken.dk/_vti_bin/DN/DataService.svc/CurrencyRatesXML?lang=en")
 
-(def energy-base-url
-  "https://api.energidataservice.dk")
-
 (def energy-api-url
-  "https://api.energidataservice.dk/datastore_search")
+  "https://api.energidataservice.dk/dataset/Elspotprices")
 
 (def default-params
-  {:resource_id   "elspotprices"
-   :limit         24
-   :sort          "HourDK desc"
-   :filters       (json/write-str {"PriceArea" "DK2"})
-   :fields        "HourDK,PriceArea,SpotPriceEUR"
-   :include_total false})
+  {:sort   "HourDK DESC"
+   :filter (json/write-str {"PriceArea" "DK2"})})
 
 (defn- hours-old
   [state-val n]
@@ -93,37 +86,21 @@
 (defn fetch-prices
   "Request price data from 'Energi Data Service' according to `params`."
   [params]
-  (client/get energy-api-url (merge request-opts {:query-params params
-                                                  :as           :json})))
+  (:records (:body (client/get energy-api-url (assoc request-opts
+                                                :query-params params
+                                                :as :json)))))
 
-(defn prices-iteration
-  "Return an iteration of price data according to `params`."
-  [params]
-  (iteration (fn [path]
-               (if (nil? path)
-                 (fetch-prices params)
-                 (client/get (str energy-base-url path)
-                             (assoc request-opts :as :json))))
-             :kf #(-> % :body :result :_links :next)
-             :vf #(-> % :body :result :records)))
-
-(defn- >=today?
-  [price-data-result]
-  (t/>= (t/parse-date (-> price-data-result first :HourDK) fmt)
-        (t/date (t/in (t/now) "CET"))))
-
-(defn fetch-current-prices
-  "Fetch current price data as a single collection according to `params`."
-  [params]
-  (->> (prices-iteration params)
-       (take-while >=today?)
-       (apply concat)))
+(defn today-str
+  "Today's date as 'YYYY-MM-dd' in CET."
+  []
+  (str (t/date (t/in (t/now) "CET"))))
 
 (defn current-prices
   "Get current price data as a single collection according to `params`."
   [params]
   (when (hours-old (get @prices params) 1)
-    (api-swap! prices update params (timestamped fetch-current-prices params)))
+    (let [params' (assoc params :start (today-str))]
+      (api-swap! prices update params (timestamped fetch-prices params'))))
   (get @prices params))
 
 (defn- local-price
@@ -185,16 +162,10 @@
   (map last (vals (daily-sorted-prices prices))))
 
 (comment
-  ;; Consult the Energi Data Service API help.
-  (-> (slurp "https://api.energidataservice.dk/help_show?name=datastore_search")
-      (json/read-str)
-      (get "result"))
-
   ;; Example API request to get spot prices in Euro/MWh.
-  (fetch-prices default-params)
-
-  ;; Return raw price data for the last two days.
-  (take 2 (prices-iteration default-params))
+  (fetch-prices {:start  (today-str)
+                 :sort   "HourDK DESC"
+                 :filter (json/write-str {"PriceArea" "DK2"})})
 
   ;; Get currently relevant price data (fetched or from cache).
   (current-prices default-params)

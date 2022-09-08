@@ -334,7 +334,7 @@
              :base-uri    "'self'"}]
     (cond-> {::http/routes         #((deref #'routes))
              ::http/type           :jetty
-             ::http/host           "0.0.0.0"
+             ::http/host           "127.0.0.1"
              ::http/port           9876
              ::http/resource-path  "/public"
              ::http/secure-headers {:content-security-policy-settings csp}})))
@@ -365,9 +365,9 @@
   (stop-dev-server)
 
   ;; Test the local endpoint.
-  (client/get "http://localhost:9876//calendar" {:query-params
-                                                 {:language  "da"
-                                                  :currency  "DKK"
-                                                  :max-price "1.00"
-                                                  :region    "DK2"}})
+  (client/get "http://localhost:9876/calendar" {:query-params
+                                                {:language  "da"
+                                                 :currency  "DKK"
+                                                 :max-price "1.00"
+                                                 :region    "DK2"}})
   #_.)
