@@ -1,6 +1,7 @@
 (ns dk.simongray.el.prices
   "Uses the public electricity spot price API from Energi Data Service."
-  (:require [clojure.data.json :as json]
+  (:require [clojure.string :as str]
+            [clojure.data.json :as json]
             [clojure.data.xml :as xml]
             [clj-http.client :as client]
             [again.core :as again]
@@ -51,13 +52,21 @@
     (map :attrs)
     (map (juxt :code #(-> % (dissoc :code) (update :rate parse-double))))))
 
+(defn- remove-bad-xml
+  "Remove invalid characters from beginning and end of `xml-str`."
+  [xml-str]
+  (-> xml-str
+      (str/replace #"^[^<]" "")
+      (str/replace #"[^>]$" "")))
+
+;; TODO: replace with less hacky solution and/or add expection catching
 (defn fetch-exchange-rates
   "Fetch currency exchange rates from Nationalbanken."
   []
   (let [result (client/get exchange-rates-url request-opts)]
     (if (bad-api-result? result)
       (throw (ex-info "Bad API result" result))
-      (let [xml     (xml/parse-str (:body result))
+      (let [xml     (xml/parse-str (remove-bad-xml (:body result)))
             content (-> xml :content first :content)]
         (into {} mappify-rates-xf content)))))
 
@@ -169,6 +178,9 @@
 
   ;; Get currently relevant price data (fetched or from cache).
   (current-prices default-params)
+
+  ;; Test the exchange rate retrieval (it's a bit of a hack)
+  (fetch-exchange-rates)
 
   ;; Get the Euro->DKK exchange rate (fetched or from cache).
   (exchange-rate "EUR")
